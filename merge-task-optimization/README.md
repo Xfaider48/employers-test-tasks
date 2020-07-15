@@ -1,6 +1,6 @@
 # Optimization test
 
-## Description
+## Task description
 You are given an array of sets with integers. You need to merge sets with equal values in one sorted set with unique elements.
 For example:
 ```php
