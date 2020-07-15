@@ -1,0 +1,52 @@
+version: '3.2'
+services:
+  postgres:
+    image: postgres:10-alpine
+    container_name: ${PROJECT_NAME}-postgres
+    ports:
+      - target: 5432
+        published: ${DB_PORT}
+        protocol: tcp
+        mode: host
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ: 'Europe/Moscow'
+      PGTZ: 'Europe/Moscow'
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+
+  composer:
+    image: composer:latest
+    container_name: ${PROJECT_NAME}-composer
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: composer install
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME}-php-fpm
+    depends_on:
+      - postgres
+      - composer
+    working_dir: /app
+    volumes:
+      - ./:/app
+
+  webserver:
+    image: nginx:alpine
+    container_name: ${PROJECT_NAME}-webserver
+    depends_on:
+      - php-fpm
+    volumes:
+      - ./deploy/nginx:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+      - "443:443"
+
+volumes:
+  database-data:

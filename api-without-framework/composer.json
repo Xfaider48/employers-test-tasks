@@ -1,0 +1,29 @@
+{
+    "name": "xfaider48/test-task-mini-api",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Dylevskiy",
+            "email": "x-faider48@mail.ru"
+        }
+    ],
+    "homepage": "https://github.com/Xfaider48/test-task-mini-api",
+    "require": {
+        "php": "^7.4",
+        "ext-json": "*",
+        "symfony/http-kernel": "^5.1",
+        "symfony/http-foundation": "^5.1",
+        "symfony/routing": "^5.1",
+        "vlucas/phpdotenv": "^5.0",
+        "illuminate/database": "^7.19",
+        "fzaninotto/faker": "^1.9",
+        "monolog/monolog": "^2.1",
+        "mbezhanov/faker-provider-collection": "^1.2",
+        "symfony/finder": "^5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
