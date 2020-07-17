@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-class Controller
+class Controller extends AbstractController
 {
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request

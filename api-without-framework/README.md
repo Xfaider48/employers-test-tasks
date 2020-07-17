@@ -32,18 +32,29 @@ API должно содержать несколько методов:
 
 ## Starting app
 To run app use command:
-`docker-compose up -d`
+```bash
+docker-compose up -d
+```
 
 To apply migrations use command:
-`docker-compose exec php-fpm sh -c "php migrate.php"`
+```bash
+docker-compose exec php-fpm sh -c "php migrate.php"
+```
 
 ## Routes
 Make products:
-`GET /products`
+```
+GET /products/generate
+```
 
 Create order:
-`POST /orders`
+```
+POST /orders
+```
 with `product_ids` in JSON body of request
 
 Make payment for order:
-`POST /orders/{orderId}/pay`
+```
+POST /orders/{orderId}/pay
+```
+with `sum` in JSON body of request

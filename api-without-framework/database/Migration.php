@@ -63,7 +63,7 @@ class Migration
         try {
             Manager::table('migrations')->count();
         } catch (QueryException $exception) {
-            if (Str::contains($exception->getMessage(), 'relation "migrations" does not exist')) {
+            if (Str::contains($exception->getMessage(), 'Undefined table')) {
                 Manager::schema()->create('migrations', function (Blueprint $table) {
                     $table->string('name');
                     $table->primary('name');

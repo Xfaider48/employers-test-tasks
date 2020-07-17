@@ -5,15 +5,20 @@ namespace App;
 
 
 use App\Http\Controllers\Controller;
+use App\Services\Models\Order\CreateOrderInterface;
 use Bezhanov\Faker\ProviderCollectionHelper;
 use Dotenv\Dotenv;
 use Faker\Factory as Faker;
 use Faker\Generator;
 use Illuminate\Database\Capsule\Manager as CapsuleManager;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -43,6 +48,11 @@ class Application
     private Generator $faker;
 
     /**
+     * @var \Symfony\Component\DependencyInjection\ContainerBuilder
+     */
+    private ContainerBuilder $container;
+
+    /**
      * @var \Symfony\Component\HttpKernel\HttpKernel
      */
     private HttpKernel $kernel;
@@ -57,6 +67,7 @@ class Application
     public function __construct(string $basePath)
     {
         static::$instance = $this;
+        $this->container = new ContainerBuilder();
         $this->basePath = $basePath;
         $this->onBooting();
     }
@@ -93,6 +104,17 @@ class Application
         return Arr::get($_ENV, $option, $default);
     }
 
+    /**-
+     * @param string $class
+     *
+     * @return object|null
+     * @throws \Exception
+     */
+    public function get(string $class)
+    {
+        return $this->container->get($class);
+    }
+
     /**
      * @return \Faker\Generator
      */
@@ -121,6 +143,7 @@ class Application
         $this->bootHttpKernel();
         $this->bootEloquent();
         $this->initFaker();
+        $this->applyProviders();
     }
 
     /**
@@ -186,5 +209,26 @@ class Application
     {
         $this->faker = Faker::create();
         ProviderCollectionHelper::addAllProvidersTo($this->faker);
+    }
+
+    /**
+     *
+     */
+    protected function applyProviders(): void
+    {
+        $finder = new Finder();
+        $path = $this->basePath('app', 'Providers');
+        $namespace = '\App\Providers\\';
+        /**
+         * @var \SplFileInfo $fileInfo
+         */
+        foreach ($finder->in($path)->files() as $fileInfo) {
+            $className = $namespace . $fileInfo->getFilenameWithoutExtension();
+            $object = new $className();
+            $call = [$object, 'provide'];
+            if (is_callable($call)) {
+                call_user_func($call, $this->container);
+            }
+        }
     }
 }

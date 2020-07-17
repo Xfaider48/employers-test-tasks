@@ -9,7 +9,7 @@ use App\Models\Product;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class ProductController
+class ProductController extends AbstractController
 {
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request

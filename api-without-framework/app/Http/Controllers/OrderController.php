@@ -4,10 +4,12 @@
 namespace App\Http\Controllers;
 
 
+use App\Application;
+use App\Exceptions\ApiException;
 use App\Models\Order;
-use App\Models\OrderStatus;
 use App\Models\Product;
-use Illuminate\Database\Capsule\Manager;
+use App\Services\Models\Order\CreateOrderInterface;
+use App\Services\Models\Order\PayOrderInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -17,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-class OrderController
+class OrderController extends AbstractController
 {
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
@@ -27,6 +29,7 @@ class OrderController
      */
     public function create(Request $request): JsonResponse
     {
+        // Validate input
         $jsonBody = json_decode($request->getContent(), true);
         if (!$jsonBody) {
             throw new BadRequestException('Malformed json body');
@@ -46,37 +49,62 @@ class OrderController
             throw new UnprocessableEntityHttpException('Bad values in `product_ids`');
         }
 
-        $inDbCount = Product::query()->whereIn('id', $validated)->count();
-        if ($inDbCount !== $validated->count()) {
+        $products = Product::query()->whereIn('id', $validated)->get();
+        if ($products->count() !== $validated->count()) {
             throw new UnprocessableEntityHttpException('Bad values in `product_ids`');
         }
 
-        $connection = Manager::connection();
-        $order = $connection->transaction(function () use ($validated) {
-            $order = new Order();
-            $order->save();
-            $order->products()->attach($validated);
-            return $order;
-        });
+        try {
+            /** @var CreateOrderInterface $creator */
+            $creator = Application::getInstance()->get(CreateOrderInterface::class);
+            $order = $creator->create($this->user, $products);
+        }
+        catch (ApiException $e) {
+            throw $e->toHttpException();
+        }
 
         $data = $order->id;
         return new JsonResponse(compact('data'));
     }
 
     /**
-     * @param int $orderId
+     * @param int                                       $orderId
+     * @param \Symfony\Component\HttpFoundation\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+     * @throws \Throwable
      */
-    public function pay(int $orderId): Response
+    public function pay(int $orderId, Request $request): Response
     {
-        $order = Order::query()->find($orderId);
+        /** @var Order $order */
+        $order = Order::query()
+            ->where('user_id', $this->user->id)
+            ->find($orderId);
+
         if (!$order) {
             throw new NotFoundHttpException('Order not found');
         }
 
-        $order->order_status_id = OrderStatus::ID_PAID;
-        $order->save();
+        // Validate input
+        $jsonBody = json_decode($request->getContent(), true);
+        if (!$jsonBody) {
+            throw new BadRequestException('Malformed json body');
+        }
+
+        $sum = (float) Arr::get($jsonBody, 'sum');
+        if ($sum <= 0) {
+            throw new UnprocessableEntityHttpException('Bad `sum` value');
+        }
+
+        try {
+            /** @var PayOrderInterface $payer */
+            $payer = Application::getInstance()->get(PayOrderInterface::class);
+            $payer->pay($order, $sum);
+        } catch (ApiException $e) {
+            throw $e->toHttpException();
+        }
+
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }
