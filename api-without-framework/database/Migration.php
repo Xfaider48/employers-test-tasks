@@ -43,12 +43,12 @@ class Migration
     }
 
     /**
-     * @return \Generator&string[]
+     * @return Generator&string[]
      */
-    protected function readMigrationClasses(): \Generator
+    protected function readMigrationClasses(): Generator
     {
         $finder = new Finder();
-        foreach ($finder->in(__DIR__ . DIRECTORY_SEPARATOR . 'migrations')->files() as $fileInfo) {
+        foreach ($finder->in(__DIR__ . DIRECTORY_SEPARATOR . 'migrations')->sortByName()->files() as $fileInfo) {
             $fileName = $fileInfo->getFilenameWithoutExtension();
             $className = Str::studly(preg_replace('/^\d+_/i', '', $fileName));
             yield [$fileName, $className, $fileInfo->getPathname()];
