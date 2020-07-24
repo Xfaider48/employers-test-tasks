@@ -7,7 +7,7 @@
             "email": "x-faider48@mail.ru"
         }
     ],
-    "homepage": "https://github.com/Xfaider48/test-task-mini-api",
+    "homepage": "https://github.com/Xfaider48/employers-test-tasks/tree/master/api-without-framework",
     "require": {
         "php": "^7.4",
         "ext-json": "*",

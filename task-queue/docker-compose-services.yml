@@ -1,0 +1,30 @@
+version: '3.2'
+services:
+  balancer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    command: ["php", "balancer.php"]
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    command: ["php", "producer.php"]
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    command: ["php", "worker.php"]
+  logger:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    command: ["php", "logger.php"]

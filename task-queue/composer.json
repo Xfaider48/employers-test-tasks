@@ -1,0 +1,24 @@
+{
+    "name": "xfaider48/task-queue",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Dylevskiy",
+            "email": "x-faider48@mail.ru"
+        }
+    ],
+    "homepage": "https://github.com/Xfaider48/employers-test-tasks/tree/master/task-queue",
+    "require": {
+        "php": "^7.4",
+        "ext-pdo": "*",
+        "vlucas/phpdotenv": "^5.1",
+        "illuminate/database": "^7.21",
+        "php-amqplib/php-amqplib": "^2.11",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

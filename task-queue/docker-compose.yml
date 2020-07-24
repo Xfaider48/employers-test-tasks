@@ -1,0 +1,39 @@
+version: '3.2'
+services:
+
+  mysql:
+    image: mysql
+    container_name: ${PROJECT_NAME}-mysql
+    ports:
+      - target: 3306
+        published: ${DB_PUBLISHED_PORT}
+        protocol: tcp
+        mode: host
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: ${PROJECT_NAME}-rabbitmq
+    ports:
+      - target: 15672
+        published: 15672
+        protocol: tcp
+        mode: host
+      - target: 5672
+        published: ${RABBITMQ_PUBLISHED_PORT}
+        protocol: tcp
+        mode: host
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
